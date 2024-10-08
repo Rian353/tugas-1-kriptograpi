@@ -1,0 +1,440 @@
+<html>
+<head>
+    <title>Kriptografi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #ffffff;
+        }
+        .container {
+            width: 50%;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #000000;
+            border-radius: 5px;
+        }
+        textarea {
+            height: 100px;
+            resize: none;
+        }
+        input[type="file"] {
+            margin-bottom: 20px;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+        .buttons button {
+            width: 48%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+        }
+        .buttons .encrypt {
+            background-color: #80e5b3;
+        }
+        .buttons .decrypt {
+            background-color: #80e5b3;
+        }
+        .output {
+            background-color: #4da6ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tugas 1 Kriptografi</h1>
+        <label for="plaintext">Plaintext:</label>
+        <textarea id="plaintext" placeholder="Masukkan teks di sini..."></textarea>
+        
+        <label for="key">Kunci:</label>
+        <input type="text" id="key" placeholder="Masukkan kunci">
+        
+        <label for="cipher-method">Metode Cipher:</label>
+        <select id="cipher-method">
+            <option value="vigenere">Vigenere Cipher</option>
+            <option value="auto-key-vigenere">Auto-Key Vigenere Cipher</option>
+            <option value="playfair">Playfair Cipher</option>
+            <option value="hill">Hill Cipher</option>
+            <option value="super-encryption">Super Encryption</option>
+        </select>
+        
+        <label for="file-upload">Unggah File:</label>
+        <input type="file" id="file-upload">
+        
+        <div class="buttons">
+            <button class="encrypt" onclick="encryptText()">encrypt</button>
+            <button class="decrypt" onclick="decryptText()">Decrypt</button>
+        </div>
+        
+        <div class="output">
+            <strong>Output:</strong>
+            <p id="output-text"></p>
+        </div>
+    </div>
+
+    <script>
+        function vigenereEncrypt(plaintext, key) {
+            let encryptedText = '';
+            key = key.toUpperCase();
+            for (let i = 0, j = 0; i < plaintext.length; i++) {
+                const c = plaintext.charCodeAt(i);
+                if (c >= 65 && c <= 90) {
+                    encryptedText += String.fromCharCode((c - 65 + key.charCodeAt(j % key.length) - 65) % 26 + 65);
+                    j++;
+                } else if (c >= 97 && c <= 122) {
+                    encryptedText += String.fromCharCode((c - 97 + key.charCodeAt(j % key.length) - 65) % 26 + 97);
+                    j++;
+                } else {
+                    encryptedText += plaintext.charAt(i);
+                }
+            }
+            return encryptedText;
+        }
+
+        function vigenereDecrypt(ciphertext, key) {
+            let decryptedText = '';
+            key = key.toUpperCase();
+            for (let i = 0, j = 0; i < ciphertext.length; i++) {
+                const c = ciphertext.charCodeAt(i);
+                if (c >= 65 && c <= 90) {
+                    decryptedText += String.fromCharCode((c - 65 - (key.charCodeAt(j % key.length) - 65) + 26) % 26 + 65);
+                    j++;
+                } else if (c >= 97 && c <= 122) {
+                    decryptedText += String.fromCharCode((c - 97 - (key.charCodeAt(j % key.length) - 65) + 26) % 26 + 97);
+                    j++;
+                } else {
+                    decryptedText += ciphertext.charAt(i);
+                }
+            }
+            return decryptedText;
+        }
+
+        function autoKeyVigenereEncrypt(plaintext, key) {
+            let encryptedText = '';
+            key = key.toUpperCase();
+            let extendedKey = key + plaintext.toUpperCase().replace(/[^A-Z]/g, '');
+            for (let i = 0; i < plaintext.length; i++) {
+                const c = plaintext.charCodeAt(i);
+                if (c >= 65 && c <= 90) {
+                    encryptedText += String.fromCharCode((c - 65 + extendedKey.charCodeAt(i) - 65) % 26 + 65);
+                } else if (c >= 97 && c <= 122) {
+                    encryptedText += String.fromCharCode((c - 97 + extendedKey.charCodeAt(i) - 65) % 26 + 97);
+                } else {
+                    encryptedText += plaintext.charAt(i);
+                }
+            }
+            return encryptedText;
+        }
+
+        function autoKeyVigenereDecrypt(ciphertext, key) {
+            let decryptedText = '';
+            key = key.toUpperCase();
+            let extendedKey = key;
+            for (let i = 0; i < ciphertext.length; i++) {
+                const c = ciphertext.charCodeAt(i);
+                let decryptedChar;
+                if (c >= 65 && c <= 90) {
+                    decryptedChar = String.fromCharCode((c - 65 - (extendedKey.charCodeAt(i) - 65) + 26) % 26 + 65);
+                    extendedKey += decryptedChar;
+                } else if (c >= 97 && c <= 122) {
+                    decryptedChar = String.fromCharCode((c - 97 - (extendedKey.charCodeAt(i) - 65) + 26) % 26 + 97);
+                    extendedKey += decryptedChar.toUpperCase();
+                } else {
+                    decryptedChar = ciphertext.charAt(i);
+                }
+                decryptedText += decryptedChar;
+            }
+            return decryptedText;
+        }
+
+        function generatePlayfairMatrix(key) {
+            key = key.toUpperCase().replace(/[^A-Z]/g, '').replace(/J/g, 'I');
+            let matrix = [];
+            let used = new Set();
+            for (let char of key) {
+                if (!used.has(char)) {
+                    matrix.push(char);
+                    used.add(char);
+                }
+            }
+            for (let i = 0; i < 26; i++) {
+                let char = String.fromCharCode(65 + i);
+                if (char === 'J') continue;
+                if (!used.has(char)) {
+                    matrix.push(char);
+                    used.add(char);
+                }
+            }
+            return matrix;
+        }
+
+        function findPosition(matrix, char) {
+            let index = matrix.indexOf(char);
+            return [Math.floor(index / 5), index % 5];
+        }
+
+        function playfairEncrypt(plaintext, key) {
+            let matrix = generatePlayfairMatrix(key);
+            plaintext = plaintext.toUpperCase().replace(/[^A-Z]/g, '').replace(/J/g, 'I');
+            if (plaintext.length % 2 !== 0) {
+                plaintext += 'X';
+            }
+            let ciphertext = '';
+            for (let i = 0; i < plaintext.length; i += 2) {
+                let [row1, col1] = findPosition(matrix, plaintext[i]);
+                let [row2, col2] = findPosition(matrix, plaintext[i + 1]);
+                if (row1 === row2) {
+                    ciphertext += matrix[row1 * 5 + (col1 + 1) % 5];
+                    ciphertext += matrix[row2 * 5 + (col2 + 1) % 5];
+                } else if (col1 === col2) {
+                    ciphertext += matrix[((row1 + 1) % 5) * 5 + col1];
+                    ciphertext += matrix[((row2 + 1) % 5) * 5 + col2];
+                } else {
+                    ciphertext += matrix[row1 * 5 + col2];
+                    ciphertext += matrix[row2 * 5 + col1];
+                }
+            }
+            return ciphertext;
+        }
+
+        function playfairDecrypt(ciphertext, key) {
+            let matrix = generatePlayfairMatrix(key);
+            ciphertext = ciphertext.toUpperCase().replace(/[^A-Z]/g, '');
+            let plaintext = '';
+            for (let i = 0; i < ciphertext.length; i += 2) {
+                let [row1, col1] = findPosition(matrix, ciphertext[i]);
+                let [row2, col2] = findPosition(matrix, ciphertext[i + 1]);
+                if (row1 === row2) {
+                    plaintext += matrix[row1 * 5 + (col1 + 4) % 5];
+                    plaintext += matrix[row2 * 5 + (col2 + 4) % 5];
+                } else if (col1 === col2) {
+                    plaintext += matrix[((row1 + 4) % 5) * 5 + col1];
+                    plaintext += matrix[((row2 + 4) % 5) * 5 + col2];
+                } else {
+                    plaintext += matrix[row1 * 5 + col2];
+                    plaintext += matrix[row2 * 5 + col1];
+                }
+            }
+            return plaintext;
+        }
+
+        function mod(n, m) {
+            return ((n % m) + m) % m;
+        }
+
+        function matrixMultiply(a, b) {
+            let result = [];
+            for (let i = 0; i < a.length; i++) {
+                result[i] = [];
+                for (let j = 0; j < b[0].length; j++) {
+                    result[i][j] = 0;
+                    for (let k = 0; k < a[0].length; k++) {
+                        result[i][j] += a[i][k] * b[k][j];
+                    }
+                    result[i][j] = mod(result[i][j], 26);
+                }
+            }
+            return result;
+        }
+
+        function hillEncrypt(plaintext, key) {
+            const matrixSize = Math.sqrt(key.length);
+            if (!Number.isInteger(matrixSize)) {
+                return "Invalid key length for Hill Cipher. Key length must be a perfect square.";
+            }
+
+            const keyMatrix = [];
+            for (let i = 0; i < matrixSize; i++) {
+                keyMatrix.push(key.slice(i * matrixSize, (i + 1) * matrixSize).split('').map(char => char.charCodeAt(0) - 65));
+            }
+
+            plaintext = plaintext.toUpperCase().replace(/[^A-Z]/g, '');
+            while (plaintext.length % matrixSize !== 0) {
+                plaintext += 'X';
+            }
+
+            let encryptedText = '';
+            for (let i = 0; i < plaintext.length; i += matrixSize) {
+                const block = plaintext.slice(i, i + matrixSize).split('').map(char => char.charCodeAt(0) - 65);
+                const encryptedBlock = matrixMultiply([block], keyMatrix)[0];
+                encryptedText += encryptedBlock.map(num => String.fromCharCode((num % 26) + 65)).join('');
+            }
+
+            return encryptedText;
+        }
+
+        function hillDecrypt(ciphertext, key) {
+            const matrixSize = Math.sqrt(key.length);
+            if (!Number.isInteger(matrixSize)) {
+                return "Invalid key length for Hill Cipher. Key length must be a perfect square.";
+            }
+
+            const keyMatrix = [];
+            for (let i = 0; i < matrixSize; i++) {
+                keyMatrix.push(key.slice(i * matrixSize, (i + 1) * matrixSize).split('').map(char => char.charCodeAt(0) - 65));
+            }
+
+            const determinant = mod(keyMatrix[0][0] * keyMatrix[1][1] - keyMatrix[0][1] * keyMatrix[1][0], 26);
+            let inverseDeterminant = 0;
+            for (let i = 0; i < 26; i++) {
+                if (mod(determinant * i, 26) === 1) {
+                    inverseDeterminant = i;
+                    break;
+                }
+            }
+
+            const inverseKeyMatrix = [
+                [keyMatrix[1][1] * inverseDeterminant, -keyMatrix[0][1] * inverseDeterminant],
+                [-keyMatrix[1][0] * inverseDeterminant, keyMatrix[0][0] * inverseDeterminant]
+            ];
+
+            for (let i = 0; i < matrixSize; i++) {
+                for (let j = 0; j < matrixSize; j++) {
+                    inverseKeyMatrix[i][j] = mod(inverseKeyMatrix[i][j], 26);
+                }
+            }
+
+            ciphertext = ciphertext.toUpperCase().replace(/[^A-Z]/g, '');
+            let decryptedText = '';
+            for (let i = 0; i < ciphertext.length; i += matrixSize) {
+                const block = ciphertext.slice(i, i + matrixSize).split('').map(char => char.charCodeAt(0) - 65);
+                const decryptedBlock = matrixMultiply([block], inverseKeyMatrix)[0];
+                decryptedText += decryptedBlock.map(num => String.fromCharCode((num % 26) + 65)).join('');
+            }
+
+            return decryptedText;
+        }
+
+        function superEncrypt(plaintext, key) {
+            const vigenereEncrypted = vigenereEncrypt(plaintext, key);
+            const transpositionEncrypted = columnarTranspositionEncrypt(vigenereEncrypted, key);
+            return transpositionEncrypted;
+        }
+
+        function superDecrypt(ciphertext, key) {
+            const transpositionDecrypted = columnarTranspositionDecrypt(ciphertext, key);
+            const vigenereDecrypted = vigenereDecrypt(transpositionDecrypted, key);
+            return vigenereDecrypted;
+        }
+
+        function columnarTranspositionEncrypt(plaintext, key) {
+            const numCols = key.length;
+            const numRows = Math.ceil(plaintext.length / numCols);
+            const grid = Array.from({ length: numRows }, () => Array(numCols).fill(''));
+
+            for (let i = 0; i < plaintext.length; i++) {
+                const row = Math.floor(i / numCols);
+                const col = i % numCols;
+                grid[row][col] = plaintext[i];
+            }
+
+            const sortedKey = key.split('').map((char, index) => ({ char, index })).sort((a, b) => a.char.localeCompare(b.char));
+            let encryptedText = '';
+            for (const { index } of sortedKey) {
+                for (let row = 0; row < numRows; row++) {
+                    encryptedText += grid[row][index];
+                }
+            }
+
+            return encryptedText;
+        }
+
+        function columnarTranspositionDecrypt(ciphertext, key) {
+            const numCols = key.length;
+            const numRows = Math.ceil(ciphertext.length / numCols);
+            const grid = Array.from({ length: numRows }, () => Array(numCols).fill(''));
+
+            const sortedKey = key.split('').map((char, index) => ({ char, index })).sort((a, b) => a.char.localeCompare(b.char));
+            let index = 0;
+            for (const { index: colIndex } of sortedKey) {
+                for (let row = 0; row < numRows; row++) {
+                    grid[row][colIndex] = ciphertext[index++];
+                }
+            }
+
+            let decryptedText = '';
+            for (let row = 0; row < numRows; row++) {
+                for (let col = 0; col < numCols; col++) {
+                    decryptedText += grid[row][col];
+                }
+            }
+
+            return decryptedText;
+        }
+
+        function encryptText() {
+            const plaintext = document.getElementById('plaintext').value;
+            const key = document.getElementById('key').value;
+            const method = document.getElementById('cipher-method').value;
+
+            let encryptedText = '';
+            if (method === 'vigenere') {
+                encryptedText = vigenereEncrypt(plaintext, key);
+            } else if (method === 'auto-key-vigenere') {
+                encryptedText = autoKeyVigenereEncrypt(plaintext, key);
+            } else if (method === 'playfair') {
+                encryptedText = playfairEncrypt(plaintext, key);
+            } else if (method === 'hill') {
+                encryptedText = hillEncrypt(plaintext, key);
+            } else if (method === 'super-encryption') {
+                encryptedText = superEncrypt(plaintext, key);
+            }
+            // Add other encryption methods here
+
+            document.getElementById('output-text').innerText = encryptedText;
+        }
+
+        function decryptText() {
+            const ciphertext = document.getElementById('plaintext').value;
+            const key = document.getElementById('key').value;
+            const method = document.getElementById('cipher-method').value;
+
+            let decryptedText = '';
+            if (method === 'vigenere') {
+                decryptedText = vigenereDecrypt(ciphertext, key);
+            } else if (method === 'auto-key-vigenere') {
+                decryptedText = autoKeyVigenereDecrypt(ciphertext, key);
+            } else if (method === 'playfair') {
+                decryptedText = playfairDecrypt(ciphertext, key);
+            } else if (method === 'hill') {
+                decryptedText = hillDecrypt(ciphertext, key);
+            } else if (method === 'super-encryption') {
+                decryptedText = superDecrypt(ciphertext, key);
+            }
+            // Add other decryption methods here
+
+            document.getElementById('output-text').innerText = decryptedText;
+        }
+    </script>
+</body>
+</html>
